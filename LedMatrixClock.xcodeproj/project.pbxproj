@@ -15,6 +15,9 @@
 		0FD43886195D9639003F8EA6 /* Index */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Index; sourceTree = BUILT_PRODUCTS_DIR; };
 		0FD43889195D9639003F8EA6 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		0FD4388C195D9639003F8EA6 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		0FD4389F195D96BB003F8EA6 /* DS18B20.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DS18B20.h; sourceTree = "<group>"; };
+		0FD438A0195D96BB003F8EA6 /* HT1632C.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HT1632C.h; sourceTree = "<group>"; };
+		0FD438A1195D96BB003F8EA6 /* zimo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = zimo.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -37,6 +40,9 @@
 		0FD43888195D9639003F8EA6 /* LedMatrixClock */ = {
 			isa = PBXGroup;
 			children = (
+				0FD4389F195D96BB003F8EA6 /* DS18B20.h */,
+				0FD438A0195D96BB003F8EA6 /* HT1632C.h */,
+				0FD438A1195D96BB003F8EA6 /* zimo.h */,
 				0FD43889195D9639003F8EA6 /* main.c */,
 				0FD4388B195D9639003F8EA6 /* Makefiles */,
 			);
@@ -329,6 +335,7 @@
 				0FD43892195D9639003F8EA6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		0FD43893195D9639003F8EA6 /* Build configuration list for PBXLegacyTarget "Build" */ = {
 			isa = XCConfigurationList;
@@ -337,6 +344,7 @@
 				0FD43895195D9639003F8EA6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		0FD43896195D9639003F8EA6 /* Build configuration list for PBXLegacyTarget "Upload" */ = {
 			isa = XCConfigurationList;
@@ -345,6 +353,7 @@
 				0FD43898195D9639003F8EA6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		0FD43899195D9639003F8EA6 /* Build configuration list for PBXLegacyTarget "Clean" */ = {
 			isa = XCConfigurationList;
@@ -353,6 +362,7 @@
 				0FD4389B195D9639003F8EA6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		0FD4389C195D9639003F8EA6 /* Build configuration list for PBXNativeTarget "Index" */ = {
 			isa = XCConfigurationList;
@@ -361,6 +371,7 @@
 				0FD4389E195D9639003F8EA6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
