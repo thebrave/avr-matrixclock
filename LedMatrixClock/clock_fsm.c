@@ -12,6 +12,9 @@
 #include "framebuffer.h"
 #include "HT1632C.h"
 
+#define BLINK_ON    0xff
+#define BLINK_OFF   0
+
 extern unsigned char framebuf[MATRIX_COL];
 extern unsigned char rtc_h, rtc_m, rtc_s;
 extern unsigned char rtc_enable;
@@ -24,7 +27,11 @@ unsigned char   fsm_2Hz;
 void fsm_init(void) {
     fsm_state = s_idle;
     fsm_need_redraw = 1;
-    fsm_2Hz = 0;
+    fsm_2Hz = BLINK_OFF;
+}
+
+unsigned char util_reverse_blinker(unsigned char x) {
+    return ((x == BLINK_ON) ? BLINK_OFF : BLINK_ON);
 }
 
 unsigned char util_gettensdigit(unsigned char x) {
@@ -35,7 +42,6 @@ unsigned char util_gettensdigit(unsigned char x) {
 #define SM_W        4
 #define LM_W        5
 void fsm_display() {
-    unsigned char inv_l, inv_h;
     framebuf_clear();
     
     unsigned char i;
@@ -66,12 +72,12 @@ void fsm_display() {
         }
     }
     
-    if(!(fsm_state == s_config_hour && fsm_2Hz == 0)) {
+    if(!(fsm_state == s_config_hour && fsm_2Hz == BLINK_OFF)) {
         framebuf_printbigchar(util_gettensdigit(rtc_h), MAIN_HROFF);
         framebuf_printbigchar(rtc_h % 10, MAIN_HROFF+LM_W);
     }
     
-    if(!(fsm_state == s_config_min && fsm_2Hz == 0)) {
+    if(!(fsm_state == s_config_min && fsm_2Hz == BLINK_OFF)) {
         framebuf_printbigchar(util_gettensdigit(rtc_m), MAIN_HROFF+2*LM_W+2);
         framebuf_printbigchar(rtc_m % 10, MAIN_HROFF+3*LM_W+2);
     }
@@ -81,7 +87,7 @@ void fsm_display() {
         framebuf_printchar(rtc_s % 10, MAIN_HROFF+4*LM_W+SM_W+3, 3);
     }
     
-    if(fsm_2Hz == 0 || fsm_state == s_config_hour) {
+    if(fsm_2Hz == BLINK_OFF || fsm_state == s_config_hour) {
         framebuf_setXY(MAIN_HROFF+2*LM_W, 2, 1);
         framebuf_setXY(MAIN_HROFF+2*LM_W, 5, 1);
     }

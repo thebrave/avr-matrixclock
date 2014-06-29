@@ -30,10 +30,21 @@
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		0F807AB319601D26001CF4F8 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				0FD438A1195D96BB003F8EA6 /* zimo.h */,
+				0F807AB0195FDF30001CF4F8 /* HT1632C.c */,
+				0FD4389F195D96BB003F8EA6 /* DS18B20.h */,
+				0FD438A0195D96BB003F8EA6 /* HT1632C.h */,
+			);
+			name = lib;
+			sourceTree = "<group>";
+		};
 		0FD4387B195D9639003F8EA6 = {
 			isa = PBXGroup;
 			children = (
-				0FD43888195D9639003F8EA6 /* LedMatrixClock */,
+				0FD43888195D9639003F8EA6 /* Sources */,
 				0FD43887195D9639003F8EA6 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -46,21 +57,19 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		0FD43888195D9639003F8EA6 /* LedMatrixClock */ = {
+		0FD43888195D9639003F8EA6 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				0F807AB0195FDF30001CF4F8 /* HT1632C.c */,
+				0F807AB319601D26001CF4F8 /* lib */,
 				0F807AA7195F563B001CF4F8 /* clock_fsm.h */,
 				0F807AAC195FDE66001CF4F8 /* clock_fsm.c */,
+				0F807AAA195FDBC7001CF4F8 /* framebuffer.h */,
 				0F807AAD195FDE66001CF4F8 /* framebuffer.c */,
-				0FD4389F195D96BB003F8EA6 /* DS18B20.h */,
-				0FD438A0195D96BB003F8EA6 /* HT1632C.h */,
-				0FD438A1195D96BB003F8EA6 /* zimo.h */,
 				0F807AB2196004AA001CF4F8 /* main.h */,
 				0FD43889195D9639003F8EA6 /* main.c */,
-				0F807AAA195FDBC7001CF4F8 /* framebuffer.h */,
 				0FD4388B195D9639003F8EA6 /* Makefiles */,
 			);
+			name = Sources;
 			path = LedMatrixClock;
 			sourceTree = "<group>";
 		};
