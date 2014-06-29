@@ -23,10 +23,13 @@ typedef enum {
     a_plus_long,
     a_minus_short,
     a_minus_long,
+    a_tick_alarm,
+    a_rtc_second,
 } e_action;
 
 unsigned char util_gettensdigit(unsigned char x);
 
+void fsm_init(void);
 void fsm_display(void);
 void fsm_transition(e_action evt);
 

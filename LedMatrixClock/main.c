@@ -12,6 +12,7 @@ unsigned char rtc_h, rtc_m, rtc_s;
 unsigned char n;
 
 extern unsigned char   fsm_need_redraw;
+unsigned char tick_alarm;
 
 /*
  if (0 == n%2) {
@@ -47,7 +48,7 @@ SIGNAL(TIMER2_COMP_vect) {
         }
     }
     
-    fsm_need_redraw = 1;
+    fsm_transition(a_rtc_second);
 }
 
 
@@ -83,18 +84,30 @@ SIGNAL(TIMER0_OVF_vect) {
         fsm_need_redraw = 0;
         fsm_display();
     }
+    
+    if(tick_alarm>0) {
+        --tick_alarm;
+        if(0 == tick_alarm) {
+            fsm_transition(a_tick_alarm);
+        }
+    }
 }
+
+
 
 void initTick(void) {
     btn_menu_cnt = 0;
     btn_up_cnt = 0;
     btn_down_cnt = 0;
+    tick_alarm = 0;
     
     TCCR0 = 0;
     TCNT0 = 0;
     TIMSK |= _BV(TOIE0);
     TCCR0 = _BV(CS01);
 }
+
+#define SYS_LFC_FREQ    32768
 
 void initRTC(void) {
     rtc_enable = 1;
@@ -126,7 +139,7 @@ int main(void) {
     _delay_ms(100);
     
     initIO();
-    
+    fsm_init();
     initMatrix();
 
     n=0;

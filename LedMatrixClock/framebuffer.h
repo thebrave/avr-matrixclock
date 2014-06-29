@@ -17,6 +17,8 @@
 void framebuf_clear(void);
 void framebuf_send(void);
 void framebuf_setXY(unsigned char x, unsigned char y, unsigned char pixel);
+
 void framebuf_printchar(unsigned char v, unsigned char x, unsigned char y);
+void framebuf_printbigchar(unsigned char v, unsigned char x);
 
 #endif /* defined(__framebuffer__) */

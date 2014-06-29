@@ -6,6 +6,8 @@
 //  Copyright (c) 2014 Jean Berniolles. All rights reserved.
 //
 
+#include "main.h"
+
 #include "clock_fsm.h"
 #include "framebuffer.h"
 #include "HT1632C.h"
@@ -13,16 +15,25 @@
 extern unsigned char framebuf[MATRIX_COL];
 extern unsigned char rtc_h, rtc_m, rtc_s;
 extern unsigned char rtc_enable;
+extern unsigned char tick_alarm;
 
 e_state         fsm_state;
 unsigned char   fsm_need_redraw;
+unsigned char   fsm_2Hz;
+
+void fsm_init(void) {
+    fsm_state = s_idle;
+    fsm_need_redraw = 1;
+    fsm_2Hz = 0;
+}
 
 unsigned char util_gettensdigit(unsigned char x) {
     return (x - (x % 10)) / 10;
 }
 
-#define MAIN_HROFF  2
+#define MAIN_HROFF  1
 #define SM_W        4
+#define LM_W        5
 void fsm_display() {
     unsigned char inv_l, inv_h;
     framebuf_clear();
@@ -36,11 +47,11 @@ void fsm_display() {
             break;
         case s_config_hour:
             inv_l = MAIN_HROFF - 1;
-            inv_h = MAIN_HROFF + 2*SM_W - 1;
+            inv_h = MAIN_HROFF + 2*LM_W - 1;
             break;
         case s_config_min:
-            inv_l = MAIN_HROFF + 2*SM_W + 1;
-            inv_h = MAIN_HROFF + 4*SM_W + 1;
+            inv_l = MAIN_HROFF + 2*LM_W + 1;
+            inv_h = MAIN_HROFF + 4*LM_W + 1;
             break;
             
         default: {
@@ -55,25 +66,24 @@ void fsm_display() {
         }
     }
     
-    
-    framebuf_printchar(util_gettensdigit(rtc_h), MAIN_HROFF, 1);
-    framebuf_printchar(rtc_h % 10, MAIN_HROFF+SM_W, 1);
-    
-    framebuf_printchar(util_gettensdigit(rtc_m), MAIN_HROFF+2*SM_W+2, 1);
-    framebuf_printchar(rtc_m % 10, MAIN_HROFF+3*SM_W+2, 1);
-    
-    if(fsm_state == s_idle) {
-        framebuf_printchar(util_gettensdigit(rtc_s), MAIN_HROFF+4*SM_W+2+1, 2);
-        framebuf_printchar(rtc_s % 10, MAIN_HROFF+5*SM_W+2+1, 2);
+    if(!(fsm_state == s_config_hour && fsm_2Hz == 0)) {
+        framebuf_printbigchar(util_gettensdigit(rtc_h), MAIN_HROFF);
+        framebuf_printbigchar(rtc_h % 10, MAIN_HROFF+LM_W);
     }
     
-    framebuf_setXY(MAIN_HROFF+4+3+1, 2, 1);
-    framebuf_setXY(MAIN_HROFF+4+3+1, 4, 1);
+    if(!(fsm_state == s_config_min && fsm_2Hz == 0)) {
+        framebuf_printbigchar(util_gettensdigit(rtc_m), MAIN_HROFF+2*LM_W+2);
+        framebuf_printbigchar(rtc_m % 10, MAIN_HROFF+3*LM_W+2);
+    }
     
-    if(inv_l < inv_h) {
-        for (; inv_l <= inv_h; ++inv_l) {
-            framebuf[inv_l] ^= 0xff;
-        }
+    if(fsm_state == s_idle) {
+        framebuf_printchar(util_gettensdigit(rtc_s), MAIN_HROFF+4*LM_W+3, 3);
+        framebuf_printchar(rtc_s % 10, MAIN_HROFF+4*LM_W+SM_W+3, 3);
+    }
+    
+    if(fsm_2Hz == 0 || fsm_state == s_config_hour) {
+        framebuf_setXY(MAIN_HROFF+2*LM_W, 2, 1);
+        framebuf_setXY(MAIN_HROFF+2*LM_W, 5, 1);
     }
     
     framebuf_send();
@@ -86,6 +96,18 @@ void fsm_transition(e_action evt) {
                 case a_menu_long:
                     rtc_enable = 0;
                     fsm_state = s_config_hour;
+                    tick_alarm = SYS_TICK_DELAY_500MS;
+                    fsm_need_redraw = 1;
+                    break;
+                    
+                case a_rtc_second:
+                    tick_alarm = SYS_TICK_DELAY_500MS;
+                    fsm_2Hz = 1;
+                    fsm_need_redraw = 1;
+                    break;
+                    
+                case a_tick_alarm:
+                    fsm_2Hz = 0;
                     fsm_need_redraw = 1;
                     break;
                     
@@ -98,21 +120,34 @@ void fsm_transition(e_action evt) {
                 case a_menu_short:
                 case a_menu_long:
                     fsm_state = s_config_min;
+                    tick_alarm = SYS_TICK_DELAY_500MS;
                     fsm_need_redraw = 1;
                     break;
+                    
                 case a_plus_short:
                     ++rtc_h;
                     if(rtc_h == 24) {
                         rtc_h = 0;
                     }
+                    tick_alarm = SYS_TICK_DELAY_500MS;
+                    fsm_2Hz = 1;
                     fsm_need_redraw = 1;
                     break;
+                    
                 case a_minus_short:
                     if (rtc_h == 0) {
                         rtc_h = 23;
                     } else {
                         --rtc_h;
                     }
+                    tick_alarm = SYS_TICK_DELAY_500MS;
+                    fsm_2Hz = 1;
+                    fsm_need_redraw = 1;
+                    break;
+                    
+                case a_tick_alarm:
+                    fsm_2Hz ^= 0xff;
+                    tick_alarm = SYS_TICK_DELAY_500MS;
                     fsm_need_redraw = 1;
                     break;
                     
@@ -134,6 +169,8 @@ void fsm_transition(e_action evt) {
                     if(rtc_m == 60) {
                         rtc_m = 0;
                     }
+                    tick_alarm = SYS_TICK_DELAY_500MS;
+                    fsm_2Hz = 1;
                     fsm_need_redraw = 1;
                     break;
                 case a_minus_short:
@@ -142,6 +179,14 @@ void fsm_transition(e_action evt) {
                     } else {
                         --rtc_m;
                     }
+                    tick_alarm = SYS_TICK_DELAY_500MS;
+                    fsm_2Hz = 1;
+                    fsm_need_redraw = 1;
+                    break;
+                    
+                case a_tick_alarm:
+                    fsm_2Hz ^= 0xff;
+                    tick_alarm = SYS_TICK_DELAY_500MS;
                     fsm_need_redraw = 1;
                     break;
                     
