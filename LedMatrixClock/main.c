@@ -11,7 +11,32 @@
 unsigned char rtc_h, rtc_m, rtc_s;
 unsigned char n;
 
+extern unsigned char   fsm_need_redraw;
+
+/*
+ if (0 == n%2) {
+ unsigned char i;
+ CS_low;
+ HT1632C_Writer(0xa0,3,CMD);
+ HT1632C_Writer(0x00,7,CMD);
+ for(i=0;i<32;i++)
+ HT1632C_Writer(0xff,8,DAT);
+ CS_high;
+ } else {
+ HT1632C_clr();
+ }
+ 
+ n++;
+ n = n%MATRIX_COL;
+ */
+
+unsigned char rtc_enable;
+
 SIGNAL(TIMER2_COMP_vect) {
+    if(0 == rtc_enable) {
+        return;
+    }
+    
     if(60 == ++rtc_s) {
         rtc_s = 0;
         if(60 == ++rtc_m) {
@@ -22,17 +47,7 @@ SIGNAL(TIMER2_COMP_vect) {
         }
     }
     
-    /*framebuf_clear();
-    
-    for(unsigned char i=0; i<8; i++) {
-        framebuf_printchar(i, i*4, i%4);
-    }
-    framebuf_send();*/
-    
-    //clock_printscreen_main();
-    
-    n++;
-    n = n%MATRIX_COL;
+    fsm_need_redraw = 1;
 }
 
 
@@ -40,21 +55,20 @@ SIGNAL(TIMER2_COMP_vect) {
 #define UP			PD6
 #define MENU			PD7
 #define BTN_MAX_DELAY 0xff
-#define BTN_SHORT     2
-#define BTN_LONG      10
+#define BTN_SHORT     50
+#define BTN_LONG      200
 
 void tick_button(unsigned char mask, unsigned char *cnt, e_action sht, e_action lng) {
-    if(PIND & mask) {
+    if(0 == (PIND & mask)) {
         if (*cnt < BTN_MAX_DELAY) {
-            ++*cnt;
-        } else {
-            if (*cnt > BTN_LONG) {
-                fsm_transition(lng);
-            } else if (*cnt > BTN_SHORT) {
-                fsm_transition(sht);
-            }
+            ++(*cnt);
         }
     } else {
+        if (*cnt > BTN_LONG) {
+            fsm_transition(lng);
+        } else if (*cnt > BTN_SHORT) {
+            fsm_transition(sht);
+        }
         *cnt = 0;
     }
 }
@@ -62,8 +76,19 @@ void tick_button(unsigned char mask, unsigned char *cnt, e_action sht, e_action 
 unsigned char btn_menu_cnt, btn_up_cnt, btn_down_cnt;
 SIGNAL(TIMER0_OVF_vect) {
     tick_button(_BV(MENU), &btn_menu_cnt, a_menu_short, a_menu_long);
-    tick_button(_BV(UP), &btn_up_cnt, a_menu_short, a_menu_long);
-    tick_button(_BV(DOWN), &btn_down_cnt, a_menu_short, a_menu_long);
+    tick_button(_BV(UP), &btn_up_cnt, a_plus_short, a_plus_long);
+    tick_button(_BV(DOWN), &btn_down_cnt, a_minus_short, a_minus_long);
+    
+    if(1 == fsm_need_redraw) {
+        fsm_need_redraw = 0;
+        fsm_display();
+    }
+
+    /*
+    framebuf_setXY(30, 0, 0 == (PIND & _BV(MENU)) ? 1 : 0);
+    framebuf_setXY(30, 1, 0 == (PIND & _BV(UP)) ? 1 : 0);
+    framebuf_setXY(30, 2, 0 == (PIND & _BV(DOWN)) ? 1 : 0);
+    framebuf_send();*/
 }
 
 void initTick(void) {
@@ -74,10 +99,11 @@ void initTick(void) {
     TCCR0 = 0;
     TCNT0 = 0;
     TIMSK |= _BV(TOIE0);
-    TCCR0 = _BV(CS01) | _BV(CS00);
+    TCCR0 = _BV(CS01);
 }
 
 void initRTC(void) {
+    rtc_enable = 1;
     rtc_s = 0;
     rtc_m = 0;
     rtc_h = 0;
@@ -128,6 +154,7 @@ int main(void) {
     _delay_ms(250);
     
     initRTC();
+    initTick();
     
     while (1) {
         

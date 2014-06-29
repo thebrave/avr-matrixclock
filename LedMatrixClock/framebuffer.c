@@ -7,6 +7,7 @@
 //
 
 #include "framebuffer.h"
+#include "HT1632C.h"
 
 unsigned char framebuf[MATRIX_COL];
 
