@@ -3,65 +3,13 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 
-#include "HT1632C.h"
+#include "clock_fsm.h"
+#include "framebuffer.h"
 
-unsigned char font_mini[10][3]= {
-    {0b11111,0b10001,0b11111}, // 0
-    {0b10010,0b11111,0b10000}, // 1
-    {0b11101,0b10101,0b10111}, // 2
-    {0b10001,0b10101,0b11111}, // 3
-    {0b00111,0b00100,0b11110}, // 4
-    {0b10111,0b10101,0b11101}, // 5
-    {0b11111,0b10101,0b11101}, // 6
-    {0b00001,0b00001,0b11111}, // 7
-    {0b11111,0b10101,0b11111}, // 8
-    {0b10111,0b10101,0b11111}, // 9
-    //{0b,0b,0b},
-};
+#include "HT1632C.h"
 
 unsigned char rtc_h, rtc_m, rtc_s;
 unsigned char n;
-
-#define MATRIX_COL  32
-unsigned char framebuf[MATRIX_COL];
-
-void framebuf_clear(void) {
-    for(unsigned char i=0; i<MATRIX_COL; i++) {
-        framebuf[i] = 0;
-    }
-}
-
-void framebuf_send(void) {
-    unsigned char buf[MATRIX_COL];
-    unsigned char mid = 0;
-    for (unsigned char i=0; i<MATRIX_COL; ++i) {
-        if((0 == (i%8)) && (0 != i)) ++mid;
-        unsigned char m = _BV(i%8);
-        buf[i] = 0;
-        for (unsigned char j=0; j<8; ++j) {
-            if(0 != (framebuf[j + (mid*8)] & m)) {
-                buf[i] |= _BV(j);
-            }
-        }
-        
-    }
-    
-    HT1632C_Writer_AllDATA(0, buf, MATRIX_COL);
-}
-
-void framebuf_setXY(unsigned char x, unsigned char y, unsigned char pixel) {
-    if(0 == pixel)
-        framebuf[x] &= (unsigned char)0xff - _BV(y);
-    else
-        framebuf[x] |= _BV(y);
-}
-
-void framebuf_printchar(unsigned char v, unsigned char x, unsigned char y) {
-    for(unsigned char i=0; i<3; ++i) {
-        framebuf[x+i] = font_mini[v][i] << y;
-    }
-}
-
 
 SIGNAL(TIMER2_COMP_vect) {
     if(60 == ++rtc_s) {
@@ -81,10 +29,52 @@ SIGNAL(TIMER2_COMP_vect) {
     }
     framebuf_send();*/
     
-    clock_printscreen_main();
+    //clock_printscreen_main();
     
     n++;
     n = n%MATRIX_COL;
+}
+
+
+#define DOWN		PD5
+#define UP			PD6
+#define MENU			PD7
+#define BTN_MAX_DELAY 0xff
+#define BTN_SHORT     2
+#define BTN_LONG      10
+
+void tick_button(unsigned char mask, unsigned char *cnt, e_action sht, e_action lng) {
+    if(PIND & mask) {
+        if (*cnt < BTN_MAX_DELAY) {
+            ++*cnt;
+        } else {
+            if (*cnt > BTN_LONG) {
+                fsm_transition(lng);
+            } else if (*cnt > BTN_SHORT) {
+                fsm_transition(sht);
+            }
+        }
+    } else {
+        *cnt = 0;
+    }
+}
+
+unsigned char btn_menu_cnt, btn_up_cnt, btn_down_cnt;
+SIGNAL(TIMER0_OVF_vect) {
+    tick_button(_BV(MENU), &btn_menu_cnt, a_menu_short, a_menu_long);
+    tick_button(_BV(UP), &btn_up_cnt, a_menu_short, a_menu_long);
+    tick_button(_BV(DOWN), &btn_down_cnt, a_menu_short, a_menu_long);
+}
+
+void initTick(void) {
+    btn_menu_cnt = 0;
+    btn_up_cnt = 0;
+    btn_down_cnt = 0;
+    
+    TCCR0 = 0;
+    TCNT0 = 0;
+    TIMSK |= _BV(TOIE0);
+    TCCR0 = _BV(CS01) | _BV(CS00);
 }
 
 void initRTC(void) {
@@ -110,30 +100,6 @@ void initIO(void) {
 	PORTB|=(1<<PB3)|(1<<PB4)|(1<<PB5);		//输出高
 	DDRD&=~((1<<PD5)|(1<<PD6)|(1<<PD7));				//输入
 	PORTD|=(1<<PD5)|(1<<PD6)|(1<<PD7);				//使能内部上拉
-}
-
-
-unsigned char util_gettensdigit(unsigned char x) {
-    return (x - (x % 10)) / 10;
-}
-
-#define MAIN_HROFF  2
-void clock_printscreen_main() {
-    framebuf_clear();
-    
-    framebuf_printchar(util_gettensdigit(rtc_h), MAIN_HROFF, 1);
-    framebuf_printchar(rtc_h % 10, MAIN_HROFF+4, 1);
-    
-    framebuf_printchar(util_gettensdigit(rtc_m), MAIN_HROFF+4+4+2, 1);
-    framebuf_printchar(rtc_m % 10, MAIN_HROFF+4+4+2+4, 1);
-    
-    framebuf_printchar(util_gettensdigit(rtc_s), MAIN_HROFF+4+4+2+4+4+1, 2);
-    framebuf_printchar(rtc_s % 10, MAIN_HROFF+4+4+2+4+4+4+1, 2);
-    
-    framebuf_setXY(MAIN_HROFF+4+3+1, 2, 1);
-    framebuf_setXY(MAIN_HROFF+4+3+1, 4, 1);
-    
-    framebuf_send();
 }
 
 int main(void) {

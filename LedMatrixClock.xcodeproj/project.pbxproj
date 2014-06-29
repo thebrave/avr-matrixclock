@@ -7,11 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0F807AAE195FDE66001CF4F8 /* clock_fsm.c in Sources */ = {isa = PBXBuildFile; fileRef = 0F807AAC195FDE66001CF4F8 /* clock_fsm.c */; };
+		0F807AAF195FDE66001CF4F8 /* framebuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 0F807AAD195FDE66001CF4F8 /* framebuffer.c */; };
+		0F807AB1195FDF30001CF4F8 /* HT1632C.c in Sources */ = {isa = PBXBuildFile; fileRef = 0F807AB0195FDF30001CF4F8 /* HT1632C.c */; };
 		0FD4388A195D9639003F8EA6 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FD43889195D9639003F8EA6 /* main.c */; };
 		0FD4388D195D9639003F8EA6 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 0FD4388C195D9639003F8EA6 /* Makefile */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0F807AA7195F563B001CF4F8 /* clock_fsm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clock_fsm.h; sourceTree = "<group>"; };
+		0F807AAA195FDBC7001CF4F8 /* framebuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = framebuffer.h; sourceTree = "<group>"; };
+		0F807AAC195FDE66001CF4F8 /* clock_fsm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = clock_fsm.c; sourceTree = "<group>"; };
+		0F807AAD195FDE66001CF4F8 /* framebuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = framebuffer.c; sourceTree = "<group>"; };
+		0F807AB0195FDF30001CF4F8 /* HT1632C.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = HT1632C.c; sourceTree = "<group>"; };
 		0FD43886195D9639003F8EA6 /* Index */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Index; sourceTree = BUILT_PRODUCTS_DIR; };
 		0FD43889195D9639003F8EA6 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		0FD4388C195D9639003F8EA6 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
@@ -40,10 +48,15 @@
 		0FD43888195D9639003F8EA6 /* LedMatrixClock */ = {
 			isa = PBXGroup;
 			children = (
+				0F807AB0195FDF30001CF4F8 /* HT1632C.c */,
+				0F807AAC195FDE66001CF4F8 /* clock_fsm.c */,
+				0F807AAD195FDE66001CF4F8 /* framebuffer.c */,
 				0FD4389F195D96BB003F8EA6 /* DS18B20.h */,
+				0F807AA7195F563B001CF4F8 /* clock_fsm.h */,
 				0FD438A0195D96BB003F8EA6 /* HT1632C.h */,
 				0FD438A1195D96BB003F8EA6 /* zimo.h */,
 				0FD43889195D9639003F8EA6 /* main.c */,
+				0F807AAA195FDBC7001CF4F8 /* framebuffer.h */,
 				0FD4388B195D9639003F8EA6 /* Makefiles */,
 			);
 			path = LedMatrixClock;
@@ -165,8 +178,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0F807AB1195FDF30001CF4F8 /* HT1632C.c in Sources */,
 				0FD4388D195D9639003F8EA6 /* Makefile in Sources */,
+				0F807AAE195FDE66001CF4F8 /* clock_fsm.c in Sources */,
 				0FD4388A195D9639003F8EA6 /* main.c in Sources */,
+				0F807AAF195FDE66001CF4F8 /* framebuffer.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
